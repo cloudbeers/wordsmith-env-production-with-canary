@@ -86,6 +86,22 @@ spec:
         deployment(environment, "canaryRelease", "canaryValues")
     } // stage
     stage("Confirm deployment") {
+        container('curl') {
+            sh """
+            echo "Canary"
+            curl http://front-canary.production-with-canary.wordsmith.beescloud.com/version
+            echo "Production"
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            sleep 1
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            sleep 1
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            sleep 1
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            sleep 1
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            """
+        }
         input 'Confirm Canary deployment?'
     }
     stage("Update real"){
@@ -107,5 +123,21 @@ spec:
             }
         } // container
     } // stage
+    stage("Check") {
+        container('curl') {
+            sh """
+            echo "Production"
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            sleep 1
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            sleep 1
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            sleep 1
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            sleep 1
+            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            """
+        }
+    }
   } // node
 } // podTemplate
