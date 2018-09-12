@@ -98,11 +98,11 @@ spec:
     } // stage
     stage("Confirm deployment") {
         container('curl') {
-            sh """#!/bin/bash
+            sh """
             echo "Canary"
             curl -stderr /dev/null http://front-canary.production-with-canary.wordsmith.beescloud.com/version
             echo "Production"
-            for i in {1..5}
+            for i in 1 2 3 4 5
             do
                 curl -stderr /dev/null http://front.production-with-canary.wordsmith.beescloud.com/version
                 sleep 1
@@ -133,9 +133,9 @@ spec:
     } // stage
     stage("Check") {
         container('curl') {
-            sh """#!/bin/bash
+            sh """
             echo "Production"
-            for i in {1..5}
+            for i in 1 2 3 4 5
             do
                 curl -stderr /dev/null http://front.production-with-canary.wordsmith.beescloud.com/version
                 sleep 1
