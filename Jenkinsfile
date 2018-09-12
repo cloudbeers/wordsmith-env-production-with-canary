@@ -1,6 +1,6 @@
 def label = "wordsmith-deployment-${UUID.randomUUID().toString()}"
 
-def deployment(String releaseKey, String valuesKey) {
+def deployment(def environment, String releaseKey, String valuesKey) {
     container('helm') {
         for (application in environment.applications) {
             def jenkinsCredentials = []
@@ -83,13 +83,13 @@ spec:
         } // container
     } // stage
     stage("Enable canary"){
-        deployment("canaryRelease", "canaryValues")
+        deployment(environment, "canaryRelease", "canaryValues")
     } // stage
     stage("Confirm deployment") {
         input 'Confirm Canary deployment?'
     }
     stage("Update real"){
-        deployment("release", "values")
+        deployment(environment, "release", "values")
         archiveArtifacts artifacts: "*.tgz", fingerprint: true
         def deploymentIssue = [fields: [
                 project: [key: 'WOR'],
