@@ -1,0 +1,8 @@
+replicaCount: 1
+image:
+  pullPolicy: Always
+ingress:
+  hosts:
+    - front-canary.production-with-canary.wordsmith.beescloud.com
+api:
+  url: api.production.wordsmith.beescloud.com
