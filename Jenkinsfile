@@ -103,9 +103,7 @@ spec:
     stage("Disable canary"){
         container('helm'){
             for (application in environment.applications) {
-                sh """
-                helm del --purge ${application[releaseKey]}
-                """
+                sh "helm del --purge ${application["canaryRelease"]}"
             }
         } // container
     } // stage
