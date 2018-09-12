@@ -1,21 +1,10 @@
 kind: deploymentPlan
 namespace: production-with-canary
 
-database:
-  liquibaseChangeLogs:
-    - v1.0.0
-    - v1.1.0
-  url: jdbc:postgresql://wordsmith-production.ca3tifbqfpuf.us-east-1.rds.amazonaws.com:5432/wordsmith
-  credentials: 
-      jenkinsCredentialsId: postgresql-admin.production
 applications:
   - release: front-production-with-canary
     chart: wordsmith/wordsmith-front
     version: "20180912.0857"
-    probe: https://front-real.production-with-canary.wordsmith.beescloud.com/
     values: wordsmith-front/values-real.yaml
-  - release: front-canary-production-with-canary
-    chart: wordsmith/wordsmith-front
-    version: "20180912.0859"
-    probe: https://front-canary.production-with-canary.wordsmith.beescloud.com/
-    values: wordsmith-front/values-canary.yaml
+    canaryRelease: front-canary-production-with-canary
+    canaryValues: wordsmith-front/values-canary.yaml
