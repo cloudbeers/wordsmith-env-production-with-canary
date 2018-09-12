@@ -115,6 +115,7 @@ spec:
             confirmDeployment = true
         } catch (Exception e) {
             confirmDeployment = false
+            currentBuild.result = 'ABORTED'
         }
     }
     stage("Update real"){
