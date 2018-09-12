@@ -1,6 +1,5 @@
 kind: deploymentPlan
-namespace: production
-active: production
+namespace: production-with-canary
 
 database:
   liquibaseChangeLogs:
