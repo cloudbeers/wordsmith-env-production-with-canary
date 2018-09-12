@@ -38,6 +38,16 @@ def deployment(def environment, String releaseKey, String valuesKey) {
     }
 }
 
+def deploymentSummary(def environment) {
+    container('helm') {
+        for (application in environment.applications) {
+            sh """
+                helm ls --namespace ${environment.namespace}
+            """
+        }
+    }
+}
+
 podTemplate(label: label, yaml: """
 apiVersion: v1
 kind: Pod
@@ -84,22 +94,19 @@ spec:
     } // stage
     stage("Enable canary"){
         deployment(environment, "canaryRelease", "canaryValues")
+        deploymentSummary(environment)
     } // stage
     stage("Confirm deployment") {
         container('curl') {
-            sh """
+            sh """#!/bin/bash
             echo "Canary"
-            curl http://front-canary.production-with-canary.wordsmith.beescloud.com/version
+            curl -stderr /dev/null http://front-canary.production-with-canary.wordsmith.beescloud.com/version
             echo "Production"
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
-            sleep 1
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
-            sleep 1
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
-            sleep 1
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
-            sleep 1
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            for i in {1..5}
+            do
+                curl -stderr /dev/null http://front.production-with-canary.wordsmith.beescloud.com/version
+                sleep 1
+            done
             """
         }
         input 'Confirm Canary deployment?'
@@ -122,20 +129,17 @@ spec:
                 sh "helm del --purge ${application["canaryRelease"]}"
             }
         } // container
+        deploymentSummary(environment)
     } // stage
     stage("Check") {
         container('curl') {
-            sh """
+            sh """#!/bin/bash
             echo "Production"
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
-            sleep 1
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
-            sleep 1
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
-            sleep 1
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
-            sleep 1
-            curl http://front.production-with-canary.wordsmith.beescloud.com/version
+            for i in {1..5}
+            do
+                curl -stderr /dev/null http://front.production-with-canary.wordsmith.beescloud.com/version
+                sleep 1
+            done
             """
         }
     }
