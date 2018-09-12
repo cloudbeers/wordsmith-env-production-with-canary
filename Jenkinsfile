@@ -115,7 +115,6 @@ spec:
             confirmDeployment = true
         } catch (Exception e) {
             confirmDeployment = false
-            throw e
         }
     }
     stage("Update real"){
