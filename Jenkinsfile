@@ -96,6 +96,7 @@ spec:
         deployment(environment, "canaryRelease", "canaryValues")
         deploymentSummary(environment)
     } // stage
+    def confirmDeployment
     stage("Confirm deployment") {
         container('curl') {
             sh """
@@ -109,19 +110,29 @@ spec:
             done
             """
         }
-        input 'Confirm Canary deployment?'
+        try {
+            input 'Confirm Canary deployment?'
+            confirmDeployment = true
+        } catch (Exception e) {
+            confirmDeployment = false
+            throw e
+        }
     }
     stage("Update real"){
-        deployment(environment, "release", "values")
-        archiveArtifacts artifacts: "*.tgz", fingerprint: true
-        def deploymentIssue = [fields: [
-                project: [key: 'WOR'],
-                summary: "Verify deployment on ${environment.namespace}",
-                description: "Please go to ${BUILD_URL} and verify the deployment logs",
-                issuetype: [name: 'Task']]]
+        if (confirmDeployment) {
+            deployment(environment, "release", "values")
+            archiveArtifacts artifacts: "*.tgz", fingerprint: true
+            def deploymentIssue = [fields: [
+                    project    : [key: 'WOR'],
+                    summary    : "Verify deployment on ${environment.namespace}",
+                    description: "Please go to ${BUILD_URL} and verify the deployment logs",
+                    issuetype  : [name: 'Task']]]
 
-        jiraResponse = jiraNewIssue issue: deploymentIssue
-        echo "Jira verification task created https://jira.beescloud.com/projects/WOR/issues/${jiraResponse.data.key}"
+            jiraResponse = jiraNewIssue issue: deploymentIssue
+            echo "Jira verification task created https://jira.beescloud.com/projects/WOR/issues/${jiraResponse.data.key}"
+        } else {
+            echo "Deployment skipped"
+        }
     } // stage
     stage("Disable canary"){
         container('helm'){
