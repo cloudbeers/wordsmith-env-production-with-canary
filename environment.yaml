@@ -4,8 +4,8 @@ namespace: production-with-canary
 applications:
   - release: front-production-with-canary
     chart: wordsmith/wordsmith-front
-    version: "20180912.0859"
-    #version: "20180912.0857"
+    #version: "20180912.0859"
+    version: "20180912.0857"
     values: wordsmith-front/values-real.yaml
     canaryRelease: front-canary-production-with-canary
     canaryValues: wordsmith-front/values-canary.yaml
